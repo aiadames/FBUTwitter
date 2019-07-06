@@ -12,9 +12,9 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
@@ -25,7 +25,6 @@ import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -79,7 +78,7 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
 
 
         RequestOptions requestOptions = new RequestOptions();
-        requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCorners(35));
+        requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCorners(35)).format(DecodeFormat.PREFER_ARGB_8888);
 
         Glide.with(context)
                 .load(tweet.user.profileImageUrl)
@@ -131,14 +130,13 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
             tvCreatedAt = (TextView) itemView.findViewById(R.id.tvCreatedAt);
             tvRetweets = (TextView) itemView.findViewById(R.id.tvRetweetsNum);
             tvFavourites = (TextView) itemView.findViewById(R.id.tvFavourites);
-            ivMedia = (ImageView) itemView.findViewById(R.id.ivMedia);
 
 
 
             ibReply.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(context, "heyyeyyeyehd", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(context, "heyyeyyeyehd", Toast.LENGTH_SHORT).show();
                     int position = getAdapterPosition();
                     // make sure the position is valid, i.e. actually exists in the view
                     if (position != RecyclerView.NO_POSITION) {
@@ -199,7 +197,7 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(context, "clicked on tweet now time for detail", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(context, "clicked on tweet now time for detail", Toast.LENGTH_SHORT).show();
                     int position = getAdapterPosition();
                     // make sure the position is valid, i.e. actually exists in the view
                     if (position != RecyclerView.NO_POSITION) {
@@ -211,6 +209,8 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
                         detailIntent.putExtra("tweet_body", tweet.body);
                         detailIntent.putExtra("tweet_name", tweet.user.name);
                         detailIntent.putExtra("tweet_image", tweet.user.profileImageUrl);
+                        detailIntent.putExtra("tweet_time", tweet.createdAt);
+
                         // serialize the movie using parceler, use its short name as a key
                         // show the activity
                         context.startActivity(detailIntent);

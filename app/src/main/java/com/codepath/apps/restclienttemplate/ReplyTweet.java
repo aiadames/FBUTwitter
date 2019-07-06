@@ -3,6 +3,8 @@ package com.codepath.apps.restclienttemplate;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,6 +24,12 @@ public class ReplyTweet extends AppCompatActivity {
     String userNameReply;
     public String myReplyTweetText;
     TwitterClient client = TwitterApp.getRestClient(this);
+    public  int charsLeft = 240;
+    TextView charCount;
+    TextView replyUser;
+
+
+    EditText myReply;
 
 
 
@@ -30,9 +38,11 @@ public class ReplyTweet extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reply_tweet);
 
-        TextView replyUser = (TextView) findViewById(R.id.tvReplyUser);
-        final EditText myReply = (EditText) findViewById(R.id.etReply);
-
+        replyUser = (TextView) findViewById(R.id.tvReplyUser);
+        myReply = (EditText) findViewById(R.id.etReply);
+        charCount = (TextView) findViewById(R.id.tvCharCount);
+        charCount.setText(String.valueOf(charsLeft));
+        tweetCount();
 
 
         Intent intent = getIntent();
@@ -67,5 +77,26 @@ public class ReplyTweet extends AppCompatActivity {
         }
     });
 
+    }
+
+
+    public void tweetCount(){
+        myReply.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                charsLeft = charsLeft+ (before - count);
+                charCount.setText(String.valueOf(charsLeft));
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
     }
 }

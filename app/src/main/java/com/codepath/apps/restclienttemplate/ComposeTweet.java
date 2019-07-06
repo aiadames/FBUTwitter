@@ -14,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
@@ -62,7 +63,7 @@ public class ComposeTweet extends AppCompatActivity {
        // tvMemberSince = (TextView) findViewById(R.id.tvMemberSince);
 
         tvFollowCount.setText("followers: " + getIntent().getStringExtra("followers"));
-        tvMemberSince.setText("member since: "+ getIntent().getStringExtra("since"));
+      //  tvMemberSince.setText("member since: "+ getIntent().getStringExtra("since"));
 
 
 
@@ -81,7 +82,7 @@ public class ComposeTweet extends AppCompatActivity {
 
 
         RequestOptions requestOptions = new RequestOptions();
-        requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCorners(35));
+        requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCorners(35)).format(DecodeFormat.PREFER_ARGB_8888);
 
 
         Glide.with(this)

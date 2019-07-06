@@ -11,7 +11,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.codepath.apps.restclienttemplate.models.Tweet;
 import com.codepath.apps.restclienttemplate.models.User;
@@ -249,7 +248,7 @@ public class TimelineActivity extends AppCompatActivity {
             rvTweets.scrollToPosition(0);
             // persist the changed model
             // notify the user the operation completed ok
-            Toast.makeText(this, "tweet added", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "tweet added", Toast.LENGTH_SHORT).show();
         }
         else if(resultCode == RESULT_OK && requestCode == TWEET_REPLY_REQUEST_CODE){
             Log.d("tweet", "reply code");

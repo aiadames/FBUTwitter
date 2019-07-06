@@ -57,12 +57,25 @@
         android:baselineAligned="false"
         android:fontFamily="@font/helv"
         android:padding="15dp"
-        android:text="tweet"
+        android:text="tweet!"
+        android:textAllCaps="false"
+        android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.996"
+        app:layout_constraintHorizontal_bias="0.938"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/etReply"
         app:layout_constraintVertical_bias="0.103" />
+
+
+    <TextView
+        android:id="@+id/tvCharCount"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="80dp"
+        android:text="TextView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etReply" />
 
 </android.support.constraint.ConstraintLayout>

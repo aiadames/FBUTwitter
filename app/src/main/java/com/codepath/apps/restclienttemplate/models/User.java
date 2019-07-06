@@ -24,7 +24,8 @@ public class User implements Serializable {
         user.name = json.getString("name");
         user.uid = json.getLong("id");
         user.screenName = json.getString("screen_name");
-        user.profileImageUrl = json.getString("profile_image_url_https");
+        String[] tokens = json.getString("profile_image_url_https").split("_normal");
+        user.profileImageUrl= tokens [0] +".jpg";
         user.create = json.getString("created_at");
         user.followers = json.getInt("followers_count");
 
