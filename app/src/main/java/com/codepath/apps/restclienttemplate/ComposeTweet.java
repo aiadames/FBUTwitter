@@ -11,7 +11,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
@@ -138,7 +137,6 @@ public class ComposeTweet extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                Toast.makeText(ComposeTweet.this, "yer",Toast.LENGTH_LONG).show();
                 charsLeft = charsLeft+ (before - count);
                 charCount.setText(String.valueOf(charsLeft));
             }

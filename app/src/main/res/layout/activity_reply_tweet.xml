@@ -55,7 +55,7 @@
         android:layout_marginBottom="8dp"
         android:background="@drawable/rounded_corners"
         android:baselineAligned="false"
-        android:fontFamily="@font/helv"
+        android:fontFamily="sans-serif"
         android:padding="15dp"
         android:text="tweet!"
         android:textAllCaps="false"
