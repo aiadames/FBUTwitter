@@ -12,6 +12,9 @@ public class User implements Serializable {
     public long uid;
     public String screenName;
     public String profileImageUrl;
+    public String createdOn;
+    public int followers;
+    public String create;
 
     // deserialize the JSON
     public static User fromJSON(JSONObject json) throws JSONException {
@@ -22,7 +25,13 @@ public class User implements Serializable {
         user.uid = json.getLong("id");
         user.screenName = json.getString("screen_name");
         user.profileImageUrl = json.getString("profile_image_url_https");
+        user.create = json.getString("created_at");
+        user.followers = json.getInt("followers_count");
 
         return user;
     }
+
+
+
 }
+

@@ -1,5 +1,7 @@
 package com.codepath.apps.restclienttemplate.models;
 
+import android.content.Entity;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -15,6 +17,9 @@ public class Tweet implements Serializable {
     public String retweets;
     public int favorites;
     public boolean favorited;
+    public Entity entities;
+    public String createdOn;
+    public int followers;
 
     // user object reference
     public User user;
@@ -27,12 +32,19 @@ public class Tweet implements Serializable {
         //extract the values from JSON
         tweet.body = jsonObject.getString("text");
         tweet.uid = jsonObject.getLong("id");
-     //   tweet.createdAt = jsonObject.getString("created_at");
+        tweet.createdAt = jsonObject.getString("created_at");
         tweet.user = User.fromJSON((jsonObject.getJSONObject("user")));
         tweet.retweets = jsonObject.getString("retweet_count");
         tweet.favorites = jsonObject.getInt("favorite_count");
         tweet.favorited = jsonObject.getBoolean("favorited");
 
+
+
+
+
         return tweet;
     }
+
+
+
 }

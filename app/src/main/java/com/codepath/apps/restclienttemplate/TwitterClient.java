@@ -65,7 +65,7 @@ public class TwitterClient extends OAuthBaseClient {
 		client.post(apiUrl, params, handler);
 	}
 
-	public void getTwitterProfilePicture(AsyncHttpResponseHandler handler){
+	public void getTwitterDetails(AsyncHttpResponseHandler handler){
 
 		String apiUrl = getApiUrl("account/verify_credentials.json");
 		client.get(apiUrl,handler);

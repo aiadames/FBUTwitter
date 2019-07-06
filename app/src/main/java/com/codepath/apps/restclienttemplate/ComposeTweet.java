@@ -3,11 +3,15 @@ package com.codepath.apps.restclienttemplate;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
@@ -31,6 +35,14 @@ public class ComposeTweet extends AppCompatActivity {
     public String myTweetText;
     TwitterClient client = TwitterApp.getRestClient(this);
     String imageUrl;
+    TextView userName;
+    TextView name;
+    public TextView tvFollowCount;
+    public TextView tvMemberSince;
+
+    TextView charCount;
+
+    int charsLeft = 240;
 
 
     @Override
@@ -39,14 +51,39 @@ public class ComposeTweet extends AppCompatActivity {
         setContentView(R.layout.activity_compose_tweet);
         tweet = (Button) findViewById(R.id.bReply);
         profilePicture = (ImageView) findViewById(R.id.profile_pic);
+        charCount = (TextView) findViewById(R.id.tvCharCount);
+        charCount.setText(String.valueOf(charsLeft));
+        etItemText = (EditText) findViewById(R.id.etReply);
+        userName = (TextView) findViewById(R.id.tvUserName);
+        name = (TextView) findViewById(R.id.tvName);
+
+
+        tvFollowCount = (TextView) findViewById(R.id.tvFollowers);
+       // tvMemberSince = (TextView) findViewById(R.id.tvMemberSince);
+
+        tvFollowCount.setText("followers: " + getIntent().getStringExtra("followers"));
+        tvMemberSince.setText("member since: "+ getIntent().getStringExtra("since"));
+
+
+
+
+
+
+        tweetCount();
+
+
+        userName.setText("@"+getIntent().getStringExtra("user_name"));
+        name.setText(getIntent().getStringExtra("name"));
+
 
         Intent i = getIntent();
-        imageUrl= i.getStringExtra("profile_image");
+        imageUrl = i.getStringExtra("profile_image");
 
 
         RequestOptions requestOptions = new RequestOptions();
         requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCorners(35));
-        
+
+
         Glide.with(this)
                 .load(imageUrl)
                 .apply(requestOptions)
@@ -57,12 +94,11 @@ public class ComposeTweet extends AppCompatActivity {
         tweet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                etItemText = (EditText)findViewById(R.id.etReply);
-                myTweetText= etItemText.getText().toString();
+                myTweetText = etItemText.getText().toString();
                 Log.d("twitter", myTweetText);
 
 
-                client.sendTweet(myTweetText, new JsonHttpResponseHandler(){
+                client.sendTweet(myTweetText, new JsonHttpResponseHandler() {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                         super.onSuccess(statusCode, headers, response);
@@ -71,7 +107,7 @@ public class ComposeTweet extends AppCompatActivity {
                         i.putExtra(NEW_TWEET, myTweetText);
                         try {
                             Tweet tweet = Tweet.fromJSON(response);
-                            i.putExtra("tweet",tweet);
+                            i.putExtra("tweet", tweet);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -86,12 +122,30 @@ public class ComposeTweet extends AppCompatActivity {
             }
 
 
+        });
 
+
+
+    }
+
+    public void tweetCount(){
+        etItemText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                Toast.makeText(ComposeTweet.this, "yer",Toast.LENGTH_LONG).show();
+                charsLeft = charsLeft+ (before - count);
+                charCount.setText(String.valueOf(charsLeft));
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
         });
     }
-
-
-
-
-
-    }
+}

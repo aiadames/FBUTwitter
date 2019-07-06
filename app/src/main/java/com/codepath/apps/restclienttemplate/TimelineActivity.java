@@ -34,8 +34,14 @@ public class TimelineActivity extends AppCompatActivity {
     RecyclerView rvTweets;
 
     private SwipeRefreshLayout swipeContainer;
+    private EndlessRecyclerViewScrollListener scrollListener;
+
 
     String imageUrl;
+    String userName;
+    String name;
+    String createdOn;
+    String followers;
 
 
     //MenuItem miActionProgressItem;
@@ -61,13 +67,18 @@ public class TimelineActivity extends AppCompatActivity {
 
         client = TwitterApp.getRestClient(this);
 
-        client.getTwitterProfilePicture(new JsonHttpResponseHandler(){
+        client.getTwitterDetails(new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 super.onSuccess(statusCode, headers, response);
                 try {
                     User user = User.fromJSON(response);
                     profilePic = user.profileImageUrl;
+                    userName = user.screenName;
+                    name = user.name;
+                    createdOn = user.createdOn;
+                    followers = (String.valueOf(user.followers));
+
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -94,6 +105,20 @@ public class TimelineActivity extends AppCompatActivity {
         rvTweets.addItemDecoration(new DividerItemDecoration(this,
                 DividerItemDecoration.VERTICAL));
 
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        scrollListener = new EndlessRecyclerViewScrollListener(linearLayoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                // Triggered only when new data needs to be appended to the list
+                // Add whatever code is needed to append new items to the bottom of the list
+                loadNextDataFromApi(page);
+            }
+        };
+        // Adds the scroll listener to RecyclerView
+        rvTweets.addOnScrollListener(scrollListener);
+
+
+
 
 
         // Lookup the swipe container view
@@ -116,6 +141,19 @@ public class TimelineActivity extends AppCompatActivity {
                 android.R.color.holo_red_light);
 
         populateTimeLine();
+    }
+
+
+
+
+    // Append the next page of data into the adapter
+    // This method probably sends out a network request and appends new data items to your adapter.
+    public void loadNextDataFromApi(int offset) {
+        // Send an API request to retrieve appropriate paginated data
+        //  --> Send the request including an offset value (i.e `page`) as a query parameter.
+        //  --> Deserialize and construct new model objects from the API response
+        //  --> Append the new data objects to the existing set of items inside the array of items
+        //  --> Notify the adapter of the new items made with `notifyItemRangeInserted()`
     }
 
     @Override
@@ -186,10 +224,12 @@ public class TimelineActivity extends AppCompatActivity {
         Intent i = new Intent(this, ComposeTweet.class);
         i.putExtra(NEW_TWEET, "" );
         i.putExtra("profile_image", profilePic);
+        i.putExtra("name",name );
+        i.putExtra("user_name",userName);
+        i.putExtra("followers" , followers);
+        i.putExtra("since" , createdOn);
         startActivityForResult(i, TWEET_REQUEST_CODE);
     }
-
-
 
 
 

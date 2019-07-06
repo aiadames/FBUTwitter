@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,7 +23,11 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -62,6 +67,16 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
         holder.tvRetweets.setText(tweet.retweets);
         Integer faves = tweet.favorites;
         holder.tvFavourites.setText(faves.toString());
+        holder.tvCreatedAt.setText(getRelativeTimeAgo(tweet.createdAt));
+
+
+   //     if (tweet.mediaUrl.equalsIgnoreCase("")){
+   //         Glide.with(context)
+    //                .load(tweet.mediaUrl)
+    //                .into(holder.ivMedia);
+
+    //    }
+
 
         RequestOptions requestOptions = new RequestOptions();
         requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCorners(35));
@@ -93,11 +108,12 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
         public TextView tvUser;
         public ImageButton ibReply;
         public ImageButton ibRetweet;
-        //   public ImageButton ibFavorite;
-        //  public TextView tvCreatedAt;
+        public TextView tvCreatedAt;
         public TextView tvRetweets;
         public TextView tvFavourites;
         public ImageButton ibFavorite;
+        public ImageView ivMedia;
+
 
 
         public ViewHolder(View itemView) {
@@ -112,19 +128,12 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
             ibReply = (ImageButton) itemView.findViewById(R.id.ibReply);
             ibRetweet = (ImageButton) itemView.findViewById(R.id.ibRetweet);
             ibFavorite = (ImageButton) itemView.findViewById(R.id.ibFavorite);
-            //      tvCreatedAt = (TextView) itemView.findViewById(R.id.tvCreatedAt);
+            tvCreatedAt = (TextView) itemView.findViewById(R.id.tvCreatedAt);
             tvRetweets = (TextView) itemView.findViewById(R.id.tvRetweetsNum);
             tvFavourites = (TextView) itemView.findViewById(R.id.tvFavourites);
+            ivMedia = (ImageView) itemView.findViewById(R.id.ivMedia);
 
-//            for (int i = 0; i<mTweets.size(); i++){
-//                Tweet tweetFave = mTweets.get(i);
-//                if (tweetFave.favorited == true){
-//                    ibFavorite.setColorFilter(ContextCompat.getColor(context, R.color.medium_red));
-//                }
-//                else{
-//                    ibFavorite.setColorFilter(ContextCompat.getColor(context, R.color.black));
-//                }
-//            }
+
 
             ibReply.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -226,4 +235,30 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
         mTweets.addAll(list);
         notifyDataSetChanged();
     }
+
+
+
+    // getRelativeTimeAgo("Mon Apr 01 21:16:23 +0000 2014");
+    public String getRelativeTimeAgo(String rawJsonDate) {
+        String twitterFormat = "EEE MMM dd HH:mm:ss ZZZZZ yyyy";
+        SimpleDateFormat sf = new SimpleDateFormat(twitterFormat, Locale.ENGLISH);
+        sf.setLenient(true);
+
+        String relativeDate = "";
+        try {
+            long dateMillis = sf.parse(rawJsonDate).getTime();
+            relativeDate = DateUtils.getRelativeTimeSpanString(dateMillis,
+                    System.currentTimeMillis(), DateUtils.SECOND_IN_MILLIS).toString();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return relativeDate;
+
+    }
+
+
+
+
+
 }
