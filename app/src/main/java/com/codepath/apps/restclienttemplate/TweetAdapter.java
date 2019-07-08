@@ -1,5 +1,4 @@
 package com.codepath.apps.restclienttemplate;
-
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.ContextCompat;
@@ -28,38 +27,39 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import cz.msebera.android.httpclient.Header;
 
 public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> {
 
-    private List<Tweet> mTweets;
-    Context context;
+    public Context context;
     TwitterClient client = TwitterApp.getRestClient(context);
+    private List<Tweet> mTweets;
+
 
     // pass in the Tweets array in the constructor
     public TweetAdapter(List<Tweet> tweets) {
         mTweets = tweets;
     }
-
     // for each row, inflate the layout and cache references into ViewHolder
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
-
         // viewHolder caches all the findById lookups
         View tweetView = inflater.inflate(R.layout.item_tweet, parent, false);
         ViewHolder viewHolder = new ViewHolder(tweetView);
         return viewHolder;
     }
 
+
     // bind the values based on the position of the element
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         // get the data according to position (in previously cached ViewHolder)
         Tweet tweet = mTweets.get(position);
-
-        // populate the views according to this data  WHAT?????????
+        // populate the views according to tweet/user specific data
         holder.tvUsername.setText(tweet.user.name);
         holder.tvBody.setText(tweet.body);
         holder.tvUser.setText("@" + tweet.user.screenName);
@@ -68,23 +68,15 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
         holder.tvFavourites.setText(faves.toString());
         holder.tvCreatedAt.setText(getRelativeTimeAgo(tweet.createdAt));
 
-
-   //     if (tweet.mediaUrl.equalsIgnoreCase("")){
-   //         Glide.with(context)
-    //                .load(tweet.mediaUrl)
-    //                .into(holder.ivMedia);
-
-    //    }
-
-
+        // loading profile image into the ImageView for each RecyclerView (specifically the layout in item_tweet)
         RequestOptions requestOptions = new RequestOptions();
         requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCorners(35)).format(DecodeFormat.PREFER_ARGB_8888);
-
         Glide.with(context)
                 .load(tweet.user.profileImageUrl)
                 .apply(requestOptions)
                 .into(holder.ivProfileImage);
 
+        // tinting icons continuously on basis of twee.favorited boolean being true or false
         if (tweet.favorited) {
             holder.ibFavorite.setColorFilter(ContextCompat.getColor(context, R.color.medium_red));
         } else {
@@ -98,41 +90,30 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
         return mTweets.size();
     }
 
-    // create ViewHolder class
-
+    // create ViewHolder class utilizing ButterKnife
     public class ViewHolder extends RecyclerView.ViewHolder {
-        public ImageView ivProfileImage;
-        public TextView tvUsername;
-        public TextView tvBody;
-        public TextView tvUser;
-        public ImageButton ibReply;
-        public ImageButton ibRetweet;
-        public TextView tvCreatedAt;
-        public TextView tvRetweets;
-        public TextView tvFavourites;
-        public ImageButton ibFavorite;
-        public ImageView ivMedia;
+        @BindView(R.id.ivProfileImage) public ImageView ivProfileImage;
+        @BindView(R.id.tvName) public TextView tvUsername;
+        @BindView(R.id.tvBody) TextView tvBody;
+        @BindView(R.id.tvUserName) public TextView tvUser;
+        @BindView(R.id.ibReply) public ImageButton ibReply;
+        @BindView(R.id.ibRetweet) public ImageButton ibRetweet;
+        @BindView(R.id.tvCreatedAt) public TextView tvCreatedAt;
+        @BindView(R.id.tvRetweetsNum) public TextView tvRetweets;
+        @BindView(R.id.tvFavourites) public TextView tvFavourites;
+        @BindView(R.id.ibFavorite) public ImageButton ibFavorite;
+        //public ImageView ivMedia;
 
 
 
         public ViewHolder(View itemView) {
             super(itemView);
+            ButterKnife.bind(this,itemView);
 
 
-            // perform findViewById lookups for attributes
-            ivProfileImage = (ImageView) itemView.findViewById(R.id.ivProfileImage);
-            tvUsername = (TextView) itemView.findViewById(R.id.tvName);
-            tvBody = (TextView) itemView.findViewById(R.id.tvBody);
-            tvUser = (TextView) itemView.findViewById(R.id.tvUserName);
-            ibReply = (ImageButton) itemView.findViewById(R.id.ibReply);
-            ibRetweet = (ImageButton) itemView.findViewById(R.id.ibRetweet);
-            ibFavorite = (ImageButton) itemView.findViewById(R.id.ibFavorite);
-            tvCreatedAt = (TextView) itemView.findViewById(R.id.tvCreatedAt);
-            tvRetweets = (TextView) itemView.findViewById(R.id.tvRetweetsNum);
-            tvFavourites = (TextView) itemView.findViewById(R.id.tvFavourites);
-
-
-
+            // set the image button corresponding to a tweet reply on a click listener
+            // get the position of the tweet in the RecyclerView and get the specific tweet object in the ArrayList mTweets
+            // create a new Intent to the ReplyTweet activity and pass through the user who originally made the tweet for reference
             ibReply.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -145,16 +126,16 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
                         // create intent for the new activity
                         Intent intent = new Intent(context, ReplyTweet.class);
                         intent.putExtra("user_reply_name", tweet.user.screenName);
-                        // serialize the movie using parceler, use its short name as a key
-                        // show the activity
-                        // FIX THIS LATER
                         context.startActivity(intent);
                     }
 
                 }
             });
 
-
+            // set the image button corresponding to a tweet favorite on a click listener
+            // get the position of the tweet in the RecyclerView, and get the tweet.favorited status (if the tweet is already favorited or not)
+            // if not favorited: that means want to send a request to Twitter to like the tweet and on success, change status of tweet.favorited and add one to its favorited count
+            // else: if tweet.favorited is already true, we are trying to unlike the tweet, and on success, change status of tweet.favorited and subtract one from its favorited count
             ibFavorite.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -193,7 +174,9 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
                 }
             });
 
-
+            // set the item tweets in RecyclerView to an click listener
+            // get the position of the tweet in the RecyclerView and get the specific tweet object in the ArrayList mTweets
+            // pass through all the details of the tweet through a new Intent to begin the DetailsTweet Activity
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -210,9 +193,6 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
                         detailIntent.putExtra("tweet_name", tweet.user.name);
                         detailIntent.putExtra("tweet_image", tweet.user.profileImageUrl);
                         detailIntent.putExtra("tweet_time", tweet.createdAt);
-
-                        // serialize the movie using parceler, use its short name as a key
-                        // show the activity
                         context.startActivity(detailIntent);
                     }
                 }
@@ -262,3 +242,4 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
 
 
 }
+

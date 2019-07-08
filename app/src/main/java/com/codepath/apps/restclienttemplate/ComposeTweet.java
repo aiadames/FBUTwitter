@@ -23,81 +23,65 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import cz.msebera.android.httpclient.Header;
 
 import static com.codepath.apps.restclienttemplate.TimelineActivity.NEW_TWEET;
 
 
 public class ComposeTweet extends AppCompatActivity {
-    EditText etItemText;
-    Button tweet;
-    ImageView profilePicture;
-    public String myTweetText;
+
     TwitterClient client = TwitterApp.getRestClient(this);
+
+    // utilizing ButterKnife to bind views and their initialization
+    @BindView(R.id.etReply) EditText etItemText;
+    @BindView(R.id.bReply) Button tweetCompose;
+    @BindView(R.id.profile_pic) ImageView profilePicture;
+    @BindView(R.id.tvUserName) TextView userName;
+    @BindView(R.id.tvName) TextView name;
+    @BindView(R.id.tvFollowers) TextView tvFollowCount;
+    @BindView(R.id.tvCharCount) TextView charCount;
+
+    String myTweetText;
     String imageUrl;
-    TextView userName;
-    TextView name;
-    public TextView tvFollowCount;
-    public TextView tvMemberSince;
-
-    TextView charCount;
-
     int charsLeft = 240;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_compose_tweet);
-        tweet = (Button) findViewById(R.id.bReply);
-        profilePicture = (ImageView) findViewById(R.id.profile_pic);
-        charCount = (TextView) findViewById(R.id.tvCharCount);
+
+        // ButterKnife values bound to onCreate
+        ButterKnife.bind(this);
+
+        // load and set texts from intent values
         charCount.setText(String.valueOf(charsLeft));
-        etItemText = (EditText) findViewById(R.id.etReply);
-        userName = (TextView) findViewById(R.id.tvUserName);
-        name = (TextView) findViewById(R.id.tvName);
-
-
-        tvFollowCount = (TextView) findViewById(R.id.tvFollowers);
-       // tvMemberSince = (TextView) findViewById(R.id.tvMemberSince);
-
         tvFollowCount.setText("followers: " + getIntent().getStringExtra("followers"));
-      //  tvMemberSince.setText("member since: "+ getIntent().getStringExtra("since"));
-
-
-
-
-
+        userName.setText("@"+getIntent().getStringExtra("user_name"));
+        name.setText(getIntent().getStringExtra("name"));
 
         tweetCount();
 
 
-        userName.setText("@"+getIntent().getStringExtra("user_name"));
-        name.setText(getIntent().getStringExtra("name"));
-
-
+        // from intent, retrieve imageUrl and use Glide to load the url, apply the rounded corners/resolution, and load into ImageView as profile picture
         Intent i = getIntent();
         imageUrl = i.getStringExtra("profile_image");
-
-
         RequestOptions requestOptions = new RequestOptions();
         requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCorners(35)).format(DecodeFormat.PREFER_ARGB_8888);
-
-
         Glide.with(this)
                 .load(imageUrl)
                 .apply(requestOptions)
                 .into(profilePicture);
 
 
-        // set edit text value from intent extra
-        tweet.setOnClickListener(new View.OnClickListener() {
+        // once user has clicked tweet button, grab text in edit text, send API client request,
+        // and on success try to send tweet text back to Timeline Activity to post at position 0 (aka as newest tweet)
+        tweetCompose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 myTweetText = etItemText.getText().toString();
                 Log.d("twitter", myTweetText);
-
-
                 client.sendTweet(myTweetText, new JsonHttpResponseHandler() {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -113,38 +97,33 @@ public class ComposeTweet extends AppCompatActivity {
                         }
                         // set the intent as the result of the activity
                         setResult(RESULT_OK, i);
-                        // close the activity and redirect to main
+                        // close the activity and redirect to TimelineActivity (where call initially was made to ComposeTweet)
                         finish();
-
                     }
                 });
-
             }
 
 
         });
 
-
-
     }
 
+    // method to track on composition the amount of characters being typed in the EditText, will set text continuously
     public void tweetCount(){
         etItemText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
-
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 charsLeft = charsLeft+ (before - count);
                 charCount.setText(String.valueOf(charsLeft));
             }
-
             @Override
             public void afterTextChanged(Editable s) {
-
             }
         });
     }
+
+
 }

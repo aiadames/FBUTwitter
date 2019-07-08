@@ -10,16 +10,16 @@ import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
 /*
- * 
- * This is the object responsible for communicating with a REST API. 
+ *
+ * This is the object responsible for communicating with a REST API.
  * Specify the constants below to change the API being communicated with.
- * See a full list of supported API classes: 
+ * See a full list of supported API classes:
  *   https://github.com/scribejava/scribejava/tree/master/scribejava-apis/src/main/java/com/github/scribejava/apis
  * Key and Secret are provided by the developer site for the given API i.e dev.twitter.com
  * Add methods for each relevant endpoint in the API.
- * 
+ *
  * NOTE: You may want to rename this object based on the service i.e TwitterClient or FlickrClient
- * 
+ *
  */
 
 
@@ -97,3 +97,4 @@ public class TwitterClient extends OAuthBaseClient {
 	 *    i.e client.post(apiUrl, params, handler);
 	 */
 }
+

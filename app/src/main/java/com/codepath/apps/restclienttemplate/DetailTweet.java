@@ -81,12 +81,12 @@ public class DetailTweet extends AppCompatActivity {
         reply.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    // create intent for the new activity
-                    Intent intent = new Intent(DetailTweet.this, ReplyTweet.class);
-                    intent.putExtra("user_reply_name",tweetUserName);
-                    // show the activity
-                    startActivity(intent);
-                }
+                // create intent for the new activity
+                Intent intent = new Intent(DetailTweet.this, ReplyTweet.class);
+                intent.putExtra("user_reply_name",tweetUserName);
+                // show the activity
+                startActivity(intent);
+            }
 
 
         });
@@ -122,5 +122,6 @@ public class DetailTweet extends AppCompatActivity {
 
 
 }
+
 
 
