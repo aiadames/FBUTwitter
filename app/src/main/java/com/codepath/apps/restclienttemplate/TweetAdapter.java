@@ -57,9 +57,9 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
         Tweet tweet = mTweets.get(position);
 
         // populate the views according to tweet/user specific data
-        holder.tvUsername.setText(tweet.user.name);
+        holder.tvUsername.setText("@" + tweet.user.screenName);
         holder.tvBody.setText(tweet.body);
-        holder.tvUser.setText("@" + tweet.user.screenName);
+        holder.tvUser.setText(tweet.user.name);
         holder.tvRetweets.setText(tweet.retweets);
         holder.tvFavourites.setText(((Integer)tweet.favorites).toString());
         holder.tvCreatedAt.setText(tweet.relativeTime);
@@ -135,7 +135,7 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
                         final Tweet tweet = mTweets.get(position);
                         long tweetId = tweet.uid;
 
-                        if (!tweet.isFavorited) {
+                        if (!(tweet.isFavorited)) {
                             Log.d("yeet", "yeeee");
                             client.favoriteTweet(tweetId, new JsonHttpResponseHandler() {
                                 @Override
