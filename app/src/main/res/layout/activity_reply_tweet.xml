@@ -47,7 +47,7 @@
 
 
     <Button
-        android:id="@+id/bReply"
+        android:id="@+id/ibReply"
         android:layout_width="144dp"
         android:layout_height="58dp"
         android:layout_marginStart="8dp"

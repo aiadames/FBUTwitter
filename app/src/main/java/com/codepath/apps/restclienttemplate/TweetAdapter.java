@@ -1,9 +1,9 @@
 package com.codepath.apps.restclienttemplate;
+
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
-import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,20 +12,16 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DecodeFormat;
-import com.bumptech.glide.load.resource.bitmap.CenterCrop;
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
-import com.bumptech.glide.request.RequestOptions;
+import com.codepath.apps.restclienttemplate.activities.DetailTweetActivity;
+import com.codepath.apps.restclienttemplate.activities.ReplyTweetActivity;
 import com.codepath.apps.restclienttemplate.models.Tweet;
+import com.codepath.apps.restclienttemplate.models.User;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
 import org.json.JSONObject;
+import org.parceler.Parcels;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -59,25 +55,20 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
     public void onBindViewHolder(ViewHolder holder, int position) {
         // get the data according to position (in previously cached ViewHolder)
         Tweet tweet = mTweets.get(position);
+
         // populate the views according to tweet/user specific data
         holder.tvUsername.setText(tweet.user.name);
         holder.tvBody.setText(tweet.body);
         holder.tvUser.setText("@" + tweet.user.screenName);
         holder.tvRetweets.setText(tweet.retweets);
-        Integer faves = tweet.favorites;
-        holder.tvFavourites.setText(faves.toString());
-        holder.tvCreatedAt.setText(getRelativeTimeAgo(tweet.createdAt));
+        holder.tvFavourites.setText(((Integer)tweet.favorites).toString());
+        holder.tvCreatedAt.setText(tweet.relativeTime);
 
-        // loading profile image into the ImageView for each RecyclerView (specifically the layout in item_tweet)
-        RequestOptions requestOptions = new RequestOptions();
-        requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCorners(35)).format(DecodeFormat.PREFER_ARGB_8888);
-        Glide.with(context)
-                .load(tweet.user.profileImageUrl)
-                .apply(requestOptions)
-                .into(holder.ivProfileImage);
+        User user = tweet.user;
+        user.loadProfilePic(context, user.profileImageUrl, holder, null);
 
         // tinting icons continuously on basis of twee.favorited boolean being true or false
-        if (tweet.favorited) {
+        if (tweet.isFavorited) {
             holder.ibFavorite.setColorFilter(ContextCompat.getColor(context, R.color.medium_red));
         } else {
             holder.ibFavorite.setColorFilter(ContextCompat.getColor(context, R.color.black));
@@ -93,16 +84,15 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
     // create ViewHolder class utilizing ButterKnife
     public class ViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.ivProfileImage) public ImageView ivProfileImage;
-        @BindView(R.id.tvName) public TextView tvUsername;
+        @BindView(R.id.tvUserName) public TextView tvUsername;
         @BindView(R.id.tvBody) TextView tvBody;
-        @BindView(R.id.tvUserName) public TextView tvUser;
+        @BindView(R.id.tvName) public TextView tvUser;
         @BindView(R.id.ibReply) public ImageButton ibReply;
         @BindView(R.id.ibRetweet) public ImageButton ibRetweet;
         @BindView(R.id.tvCreatedAt) public TextView tvCreatedAt;
         @BindView(R.id.tvRetweetsNum) public TextView tvRetweets;
         @BindView(R.id.tvFavourites) public TextView tvFavourites;
         @BindView(R.id.ibFavorite) public ImageButton ibFavorite;
-        //public ImageView ivMedia;
 
 
 
@@ -110,22 +100,21 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
             super(itemView);
             ButterKnife.bind(this,itemView);
 
-
             // set the image button corresponding to a tweet reply on a click listener
             // get the position of the tweet in the RecyclerView and get the specific tweet object in the ArrayList mTweets
             // create a new Intent to the ReplyTweet activity and pass through the user who originally made the tweet for reference
             ibReply.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //Toast.makeText(context, "heyyeyyeyehd", Toast.LENGTH_SHORT).show();
                     int position = getAdapterPosition();
                     // make sure the position is valid, i.e. actually exists in the view
                     if (position != RecyclerView.NO_POSITION) {
                         // get the movie at the position, this won't work if the class is static
                         Tweet tweet = mTweets.get(position);
+                        User user = tweet.user;
                         // create intent for the new activity
-                        Intent intent = new Intent(context, ReplyTweet.class);
-                        intent.putExtra("user_reply_name", tweet.user.screenName);
+                        Intent intent = new Intent(context, ReplyTweetActivity.class);
+                        intent.putExtra("user", Parcels.wrap(user));
                         context.startActivity(intent);
                     }
 
@@ -146,24 +135,24 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
                         final Tweet tweet = mTweets.get(position);
                         long tweetId = tweet.uid;
 
-                        if (!tweet.favorited) {
+                        if (!tweet.isFavorited) {
                             Log.d("yeet", "yeeee");
                             client.favoriteTweet(tweetId, new JsonHttpResponseHandler() {
                                 @Override
                                 public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                                     Log.d("tweet", "tweet");
-                                    tweet.favorited = !(tweet.favorited);
+                                    tweet.isFavorited = !(tweet.isFavorited);
                                     tweet.favorites+=1;
                                     notifyItemChanged(position);
                                 }
                             });
 
-                        } else if (tweet.favorited) {
+                        } else if (tweet.isFavorited) {
                             client.destroyFavoriteTweet(tweetId, new JsonHttpResponseHandler() {
                                 @Override
                                 public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                                     Log.d("tweet", "ehhehhehe");
-                                    tweet.favorited = !(tweet.favorited);
+                                    tweet.isFavorited = !(tweet.isFavorited);
                                     tweet.favorites-=1;
                                     notifyItemChanged(position);
                                 }
@@ -187,20 +176,13 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
                         // get the movie at the position, this won't work if the class is static
                         Tweet tweet = mTweets.get(position);
                         // create intent for the new activity
-                        Intent detailIntent = new Intent(context, DetailTweet.class);
-                        detailIntent.putExtra("tweet_user", tweet.user.screenName);
-                        detailIntent.putExtra("tweet_body", tweet.body);
-                        detailIntent.putExtra("tweet_name", tweet.user.name);
-                        detailIntent.putExtra("tweet_image", tweet.user.profileImageUrl);
-                        detailIntent.putExtra("tweet_time", tweet.createdAt);
+                        Intent detailIntent = new Intent(context, DetailTweetActivity.class);
+                        detailIntent.putExtra("tweet", Parcels.wrap(tweet));
                         context.startActivity(detailIntent);
                     }
                 }
             });
-
         }
-
-
     }
 
 
@@ -216,26 +198,6 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
         notifyDataSetChanged();
     }
 
-
-
-    // getRelativeTimeAgo("Mon Apr 01 21:16:23 +0000 2014");
-    public String getRelativeTimeAgo(String rawJsonDate) {
-        String twitterFormat = "EEE MMM dd HH:mm:ss ZZZZZ yyyy";
-        SimpleDateFormat sf = new SimpleDateFormat(twitterFormat, Locale.ENGLISH);
-        sf.setLenient(true);
-
-        String relativeDate = "";
-        try {
-            long dateMillis = sf.parse(rawJsonDate).getTime();
-            relativeDate = DateUtils.getRelativeTimeSpanString(dateMillis,
-                    System.currentTimeMillis(), DateUtils.SECOND_IN_MILLIS).toString();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        return relativeDate;
-
-    }
 
 
 
